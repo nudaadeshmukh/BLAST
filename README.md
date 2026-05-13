@@ -5,10 +5,9 @@
 
 ---
 
-## 📽️ Demo
+## 🔗 Project Link
 
-<!-- Add your demo video link below -->
-> 🎬 **Demo Video:** [Click here to watch](YOUR_VIDEO_LINK_HERE)  
+>  🚀 **Deployed Project:** [Click here to open BLAST](https://pbl-omega-brown.vercel.app/)  
 
 ---
 
