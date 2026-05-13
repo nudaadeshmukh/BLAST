@@ -1,4 +1,4 @@
-package com.example.sable.exception;
+package com.example.SABLE.exception;
 
 public class DuplicateTransactionException extends RuntimeException {
     public DuplicateTransactionException(String message) {

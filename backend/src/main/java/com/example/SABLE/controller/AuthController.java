@@ -1,10 +1,10 @@
-package com.example.sable.controller;
+package com.example.SABLE.controller;
 
-import com.example.sable.dto.AuthResponse;
-import com.example.sable.dto.ChangePasswordRequest;
-import com.example.sable.dto.LoginRequest;
-import com.example.sable.dto.RegisterRequest;
-import com.example.sable.service.UserService;
+import com.example.SABLE.dto.AuthResponse;
+import com.example.SABLE.dto.ChangePasswordRequest;
+import com.example.SABLE.dto.LoginRequest;
+import com.example.SABLE.dto.RegisterRequest;
+import com.example.SABLE.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

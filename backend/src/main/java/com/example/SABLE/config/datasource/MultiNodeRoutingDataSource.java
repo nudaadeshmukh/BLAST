@@ -1,4 +1,4 @@
-package com.example.sable.config.datasource;
+package com.example.SABLE.config.datasource;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.transaction.support.TransactionSynchronizationManager;

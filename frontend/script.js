@@ -16,10 +16,49 @@ if (document.getElementById("landing-page")) {
 }
 
 // =========================
+// TAMPERING DEMONSTRATION LOGIC
+// =========================
+
+async function tamperTransaction(transactionId, currentAmount) {
+    const newAmount = prompt(`Simulate Hacker Attack!\n\nEnter the tampered amount (Original: $${currentAmount}):`, "9999");
+    if (!newAmount || newAmount == currentAmount) return;
+
+    try {
+        await apiRequest(`/api/transactions/${transactionId}/tamper?amount=${newAmount}`, {
+            method: "PUT",
+            auth: true
+        });
+        alert(`SUCCESS! Database record for ${transactionId.substring(0, 8)} has been maliciously altered to $${newAmount}. The Blockchain integrity hash was bypassed!\n\nGo to the Audit Panel to see the tampering detected.`);
+        window.location.reload();
+    } catch (e) {
+        alert("Failed to tamper: " + e.message);
+    }
+}
+
+async function restoreTransaction(transactionId) {
+    if (!confirm("Auto-Heal Protocol Initiated.\n\nThe system will now query the immutable Ganache Blockchain, extract the true transaction amount, and permanently repair the compromised database. Proceed?")) return;
+
+    try {
+        await apiRequest(`/api/transactions/${transactionId}/restore`, {
+            method: "PUT",
+            auth: true
+        });
+        alert(`SUCCESS! The database has been successfully repaired using the Blockchain's immutable record!`);
+        window.location.reload();
+    } catch (e) {
+        alert("Failed to auto-heal: " + e.message);
+    }
+}
+
+// =========================
+// RENDER AUDIT TABLE
+// =========================
+
+// =========================
 // Backend API integration
 // =========================
 // Use `var` to avoid temporal-dead-zone issues across page scripts.
-var API_BASE_URL = "http://localhost:8081";
+var API_BASE_URL = "https://sable-backend-aqvz.onrender.com";
 
 function getAuthToken() {
     const user = getCurrentUser();
@@ -220,13 +259,13 @@ function loadDashboard() {
 function handleLogout() {
     clearCurrentUser();
     // Clear any legacy session keys (older multi-page versions used sessionStorage).
-    try { sessionStorage.removeItem("blast_current_user"); } catch (e) {}
-    try { sessionStorage.removeItem("currentUser"); } catch (e) {}
-    try { localStorage.removeItem("blast_current_user"); } catch (e) {}
-    try { localStorage.removeItem("currentUser"); } catch (e) {}
+    try { sessionStorage.removeItem("blast_current_user"); } catch (e) { }
+    try { sessionStorage.removeItem("currentUser"); } catch (e) { }
+    try { localStorage.removeItem("blast_current_user"); } catch (e) { }
+    try { localStorage.removeItem("currentUser"); } catch (e) { }
 
     // Prevent back-navigation into protected pages: replace current history entry.
-    try { history.replaceState(null, "", "index.html"); } catch (e) {}
+    try { history.replaceState(null, "", "index.html"); } catch (e) { }
     window.location.replace("index.html");
 }
 
@@ -382,14 +421,14 @@ async function loadDashboardStats() {
     // Auditor gets a tampering status snapshot.
     let auditStatus = null;
     let lastVerifiedAt = null;
-    try { lastVerifiedAt = localStorage.getItem("lastVerifiedAt"); } catch (e) {}
+    try { lastVerifiedAt = localStorage.getItem("lastVerifiedAt"); } catch (e) { }
 
     if (roleUpper === "AUDITOR") {
         try {
             const verification = await apiRequest("/api/blockchain/verify?blockLimit=20", { auth: true });
             auditStatus = verification?.tamperingDetected ? "Tampering Detected" : "No Tampering";
             lastVerifiedAt = new Date().toLocaleString();
-            try { localStorage.setItem("lastVerifiedAt", lastVerifiedAt); } catch (e) {}
+            try { localStorage.setItem("lastVerifiedAt", lastVerifiedAt); } catch (e) { }
         } catch (e) {
             auditStatus = "Verify failed";
         }
@@ -460,8 +499,22 @@ async function loadRecentBlocks() {
         return;
     }
 
+    const user = getCurrentUser();
+    const isAdmin = user && (user.role || "").toUpperCase() === "ADMIN";
+
     recent.forEach(tx => {
         const when = tx.timestamp ? new Date(tx.timestamp).toLocaleString() : "";
+
+        let actionButtons = "";
+        if (isAdmin) {
+            actionButtons = `
+                <div class="mt-2 flex gap-2">
+                    <button onclick="tamperTransaction('${tx.transactionId}', ${tx.amount})" class="px-3 py-1 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded text-xs transition border border-red-500/30">Simulate Hack</button>
+                    <button onclick="restoreTransaction('${tx.transactionId}')" class="px-3 py-1 bg-green-500/20 text-green-400 hover:bg-green-500/40 rounded text-xs transition border border-green-500/30">Auto-Heal from Blockchain</button>
+                </div>
+            `;
+        }
+
         container.innerHTML += `
             <div class="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/10">
                 <div>
@@ -471,6 +524,7 @@ async function loadRecentBlocks() {
                     <div class="text-sm text-white/70">
                         ${tx.sender || ""} → ${tx.receiver || ""} • ${Number(tx.amount || 0).toFixed(4)} ETH
                     </div>
+                    ${actionButtons}
                 </div>
                 <div class="text-right text-sm text-white/70">
                     ${when}
@@ -762,7 +816,7 @@ function renderAuditTable(data) {
     data.forEach(tx => {
         tbody.innerHTML += `
             <tr class="border-b border-white/10">
-                <td class="py-2 pr-3 whitespace-nowrap">${tx.id.substring(0,12)}...</td>
+                <td class="py-2 pr-3 whitespace-nowrap">${tx.id.substring(0, 12)}...</td>
                 <td class="py-2 pr-3">${tx.sender}</td>
                 <td class="py-2 pr-3">${tx.receiver}</td>
                 <td class="py-2 pr-3 text-green-300 whitespace-nowrap">$${tx.amount.toFixed(2)}</td>

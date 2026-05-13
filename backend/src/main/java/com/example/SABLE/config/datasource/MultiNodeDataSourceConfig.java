@@ -1,4 +1,4 @@
-package com.example.sable.config.datasource;
+package com.example.SABLE.config.datasource;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,15 +1,15 @@
-package com.example.sable.service;
+package com.example.SABLE.service;
 
-import com.example.sable.dto.AuthResponse;
-import com.example.sable.dto.ChangePasswordRequest;
-import com.example.sable.dto.LoginRequest;
-import com.example.sable.dto.RegisterRequest;
-import com.example.sable.exception.DuplicateTransactionException;
-import com.example.sable.exception.ResourceNotFoundException;
-import com.example.sable.model.Role;
-import com.example.sable.model.User;
-import com.example.sable.repository.UserRepository;
-import com.example.sable.security.JwtUtil;
+import com.example.SABLE.dto.AuthResponse;
+import com.example.SABLE.dto.ChangePasswordRequest;
+import com.example.SABLE.dto.LoginRequest;
+import com.example.SABLE.dto.RegisterRequest;
+import com.example.SABLE.exception.DuplicateTransactionException;
+import com.example.SABLE.exception.ResourceNotFoundException;
+import com.example.SABLE.model.Role;
+import com.example.SABLE.model.User;
+import com.example.SABLE.repository.UserRepository;
+import com.example.SABLE.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

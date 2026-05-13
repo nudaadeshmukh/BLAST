@@ -1,4 +1,4 @@
-package com.example.sable.integrity;
+package com.example.SABLE.integrity;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

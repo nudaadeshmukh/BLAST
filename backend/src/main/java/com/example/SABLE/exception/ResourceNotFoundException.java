@@ -1,4 +1,4 @@
-package com.example.sable.exception;
+package com.example.SABLE.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {

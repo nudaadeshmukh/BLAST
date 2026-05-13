@@ -1,4 +1,4 @@
-package com.example.sable.security;
+package com.example.SABLE.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

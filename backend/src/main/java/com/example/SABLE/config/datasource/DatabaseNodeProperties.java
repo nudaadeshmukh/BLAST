@@ -1,4 +1,4 @@
-package com.example.sable.config.datasource;
+package com.example.SABLE.config.datasource;
 
 public class DatabaseNodeProperties {
     private String url;

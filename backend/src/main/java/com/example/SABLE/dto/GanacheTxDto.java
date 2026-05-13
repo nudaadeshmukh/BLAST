@@ -1,4 +1,4 @@
-package com.example.sable.dto;
+package com.example.SABLE.dto;
 
 public class GanacheTxDto {
     private String txHash;

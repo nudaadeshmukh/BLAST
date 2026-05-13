@@ -1,7 +1,7 @@
-package com.example.sable.blockchain;
+package com.example.SABLE.blockchain;
 
-import com.example.sable.dto.GanacheBlockDto;
-import com.example.sable.dto.BlockchainVerificationDto;
+import com.example.SABLE.dto.GanacheBlockDto;
+import com.example.SABLE.dto.BlockchainVerificationDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;

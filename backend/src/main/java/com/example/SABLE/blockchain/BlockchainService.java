@@ -1,12 +1,13 @@
-package com.example.sable.blockchain;
+package com.example.SABLE.blockchain;
 
-import com.example.sable.dto.GanacheBlockDto;
-import com.example.sable.dto.GanacheTxDto;
-import com.example.sable.dto.BlockchainVerificationDto;
-import com.example.sable.dto.TransactionIntegrityFindingDto;
-import com.example.sable.integrity.TransactionIntegritySnapshot;
-import com.example.sable.model.Transaction;
-import com.example.sable.service.TransactionService;
+import com.example.SABLE.dto.GanacheBlockDto;
+import com.example.SABLE.dto.GanacheTxDto;
+import com.example.SABLE.dto.BlockchainVerificationDto;
+import com.example.SABLE.dto.TransactionIntegrityFindingDto;
+import com.example.SABLE.integrity.TransactionIntegritySnapshot;
+import com.example.SABLE.model.Transaction;
+import com.example.SABLE.service.TransactionService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -25,20 +26,22 @@ import java.util.Set;
 
 @Service
 public class BlockchainService {
-    private static final String SENDER_PRIVATE_KEY =
-            "0xe0396dd66930d63f462627faa75345913890d5476f4441b2bfb639a8a838f51f";
+
+    @Value("${blockchain.sender-private-key}")
+    private String senderPrivateKey;
 
     private final Web3j web3j;
     private final TransactionService transactionService;
 
-    public BlockchainService(TransactionService transactionService) {
-        // this.web3j = Web3j.build(new HttpService("http://127.0.0.1:7545"));
+    public BlockchainService(TransactionService transactionService,
+                             @Value("${blockchain.url}") String blockchainUrl) {
+        this.web3j = Web3j.build(new HttpService(blockchainUrl));
         this.transactionService = transactionService;
     }
 
     public String sendTransaction(String transactionId) throws Exception {
         Transaction tx = transactionService.getTransactionByTransactionId(transactionId);
-        Credentials credentials = Credentials.create(SENDER_PRIVATE_KEY);
+        Credentials credentials = Credentials.create(senderPrivateKey);
 
         String toAddress = tx.getReceiver();
         if (!WalletUtils.isValidAddress(toAddress)) {
@@ -60,9 +63,25 @@ public class BlockchainService {
         return receipt.getTransactionHash();
     }
 
+    private void checkAndHandleGanacheReset() {
+        try {
+            BigInteger latestBlock = web3j.ethBlockNumber().send().getBlockNumber();
+            if (latestBlock.equals(BigInteger.ZERO)) {
+                List<Transaction> all = transactionService.getAllTransactions();
+                boolean hasOnChain = all.stream().anyMatch(Transaction::isOnChain);
+                if (hasOnChain) {
+                    transactionService.deleteAllTransactions();
+                }
+            }
+        } catch (Exception e) {
+            // Ignore if ganache is unreachable
+        }
+    }
+
     public void syncAllTransactionsToBlockchain() throws Exception {
+        checkAndHandleGanacheReset();
         List<Transaction> transactions = transactionService.getUnsyncedTransactions();
-        Credentials credentials = Credentials.create(SENDER_PRIVATE_KEY);
+        Credentials credentials = Credentials.create(senderPrivateKey);
         for (Transaction tx : transactions) {
             try {
                 String toAddress = tx.getReceiver();
@@ -91,6 +110,7 @@ public class BlockchainService {
     }
 
     public List<GanacheBlockDto> getRecentBlocks(int limit) throws Exception {
+        checkAndHandleGanacheReset();
         int safeLimit = Math.max(1, Math.min(limit, 200));
 
         BigInteger latest = web3j.ethBlockNumber().send().getBlockNumber();
@@ -137,6 +157,7 @@ public class BlockchainService {
     }
 
     public BlockchainVerificationDto verifyBlockchainAndDatabase(int blockLimit) throws Exception {
+        checkAndHandleGanacheReset();
         BlockchainVerificationDto result = new BlockchainVerificationDto();
 
         // 1) Verify chain linkage for the returned segment of chain.
@@ -261,6 +282,29 @@ public class BlockchainService {
             result.getWarnings().add("WARNING: Possible tampering detected. Review findings.");
         }
         return result;
+    }
+
+    public Transaction restoreTransaction(String transactionId) throws Exception {
+        Transaction tx = transactionService.getTransactionByTransactionId(transactionId);
+        
+        if (!tx.isOnChain() || tx.getBlockchainTxHash() == null || tx.getBlockchainTxHash().isBlank()) {
+            throw new IllegalStateException("Transaction is not on the blockchain. Cannot restore.");
+        }
+
+        var resp = web3j.ethGetTransactionByHash(tx.getBlockchainTxHash()).send();
+        var onChainTx = resp.getTransaction().orElseThrow(() -> 
+            new IllegalStateException("On-chain transaction not found for hash: " + tx.getBlockchainTxHash())
+        );
+
+        BigInteger onChainWei = onChainTx.getValue();
+        if (onChainWei != null) {
+            BigDecimal ethValue = Convert.fromWei(new BigDecimal(onChainWei), Convert.Unit.ETHER);
+            tx.setAmount(ethValue.doubleValue());
+            // Intentionally bypassing re-computation of the hash so that it naturally matches the original hash again
+            return transactionService.save(tx);
+        }
+        
+        throw new IllegalStateException("Blockchain transaction had no value to restore.");
     }
 }
 

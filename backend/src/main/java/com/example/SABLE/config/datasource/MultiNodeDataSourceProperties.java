@@ -1,4 +1,4 @@
-package com.example.sable.config.datasource;
+package com.example.SABLE.config.datasource;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

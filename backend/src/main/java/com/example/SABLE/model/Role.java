@@ -1,4 +1,4 @@
-package com.example.sable.model;
+package com.example.SABLE.model;
 
 public enum Role {
     ADMIN,

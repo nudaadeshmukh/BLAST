@@ -1,4 +1,4 @@
-package com.example.sable.security;
+package com.example.SABLE.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

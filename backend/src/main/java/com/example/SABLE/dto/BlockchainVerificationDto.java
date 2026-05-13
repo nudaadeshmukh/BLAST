@@ -1,4 +1,4 @@
-package com.example.sable.dto;
+package com.example.SABLE.dto;
 
 import java.util.ArrayList;
 import java.util.List;

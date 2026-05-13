@@ -1,6 +1,6 @@
-package com.example.sable.integrity;
+package com.example.SABLE.integrity;
 
-import com.example.sable.model.Transaction;
+import com.example.SABLE.model.Transaction;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;

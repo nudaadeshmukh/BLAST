@@ -1,11 +1,11 @@
-package com.example.sable.service;
+package com.example.SABLE.service;
 
-import com.example.sable.dto.TransactionRequest;
-import com.example.sable.exception.DuplicateTransactionException;
-import com.example.sable.exception.ResourceNotFoundException;
-import com.example.sable.integrity.TransactionIntegritySnapshot;
-import com.example.sable.model.Transaction;
-import com.example.sable.repository.TransactionRepository;
+import com.example.SABLE.dto.TransactionRequest;
+import com.example.SABLE.exception.DuplicateTransactionException;
+import com.example.SABLE.exception.ResourceNotFoundException;
+import com.example.SABLE.integrity.TransactionIntegritySnapshot;
+import com.example.SABLE.model.Transaction;
+import com.example.SABLE.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +80,11 @@ public class TransactionService {
     @Transactional
     public Transaction save(Transaction transaction) {
         return transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public void deleteAllTransactions() {
+        transactionRepository.deleteByOnChainTrue();
     }
 }
 
